@@ -22,13 +22,12 @@ const Mahasiswa = () => {
           (angkatan) => angkatan.tahun_masuk == data_mahasiswa.tahun_masuk
         )?.data;
 
-      const mahasiswa = kelas.cuti.concat(kelas.pagi).concat(kelas.malam).find((mahasiswa)=> mahasiswa.id ==data_mahasiswa.id);
+      const mahasiswa = kelas?.cuti.concat(kelas.pagi).concat(kelas.malam).find((mahasiswa)=> mahasiswa.id ==data_mahasiswa.id);
 
-      setMahasiswa(mahasiswa || {}); // Update State
+      setMahasiswa(mahasiswa); // Update State
     };
     fetchData();
   }, []);
-
 
   return (
     <div>
