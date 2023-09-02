@@ -3,70 +3,48 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 const Mahasiswa = () => {
-  const npm = useParams();
-  const data_mahasiswa = [
-    {
-      angkatan: "20" + npm.id.substring(0, 2),
-      kode_prodi: parseInt(npm.id.substring(4, 6)),
-      id: parseInt(npm.id.slice(-1)),
-    },
-  ];
-  // console.log(data_mahasiswa)
+  const params = useParams();
+  const data_mahasiswa = {
+    tahun_masuk: "20" + params.id.substring(0, 2),
+    kode_prodi: parseInt(params.id.substring(4, 6)),
+    id: parseInt(params.id.substring(6, 10)),
+  };
 
-  const [prodis, setProdis] = useState([]);
+  const [mahasiswa, setMahasiswa] = useState({});
+
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(
         "https://strapi-rygs.onrender.com/api/prodis"
       );
-      setProdis(res.data.data[0].attributes.prodi[0]);
+      const kelas = res.data.data[0].attributes.prodi[0]
+        .find((prodi) => prodi.kode_prodi == data_mahasiswa.kode_prodi)?.mahasiswa.find(
+          (angkatan) => angkatan.tahun_masuk == data_mahasiswa.tahun_masuk
+        )?.data;
+
+      const mahasiswa = kelas.cuti.concat(kelas.pagi).concat(kelas.malam).find((mahasiswa)=> mahasiswa.id ==data_mahasiswa.id);
+
+      setMahasiswa(mahasiswa || {}); // Update State
     };
     fetchData();
   }, []);
 
+
   return (
-    <>
-      <p>Daftar Mahasiswa</p>
-      {prodis.map((prodi, i) => {
-        <div key={i}>
-              {prodi.mahasiswa.map((angkatan, j) => {
-                  <p>{angkatan.tahun_masuk}</p>
-            //     const kelas = Object.entries(angkatan.data);
-            //     {
-            //       data_mahasiswa.find(
-            //         (data_angkatan) =>
-            //           data_angkatan.angkatan == angkatan.tahun_masuk
-            //       ) ? (
-            //         <div>
-            //           {kelas.map((item, k) => {
-            //             {
-            //               item[1].map((daftarMahasiswa, l) => {
-            //                 {
-            //                   data_mahasiswa.find(
-            //                     (data_id) => data_id.id == daftarMahasiswa.id
-            //                   ) ? (
-            //                     <div>
-            //                       <p>NPM : {npm}</p>
-            //                       <p>Nama: {daftarMahasiswa.nama}</p>
-            //                       <p>Alamat: {daftarMahasiswa.alamat}</p>
-            //                       <p>Hobi: {daftarMahasiswa.hobi.join(", ")}</p>
-            //                     </div>
-            //                   ) : (
-            //                     <p>Data tidak terdaftar</p>
-            //                   );
-            //                 }
-            //               });
-            //             }
-            //           })}
-            //         </div>
-            //       ) : (
-            //         <p>Data Tidak Terdata</p>
-            //       );
-            //     }
-              })}
-            // </div>
-      })}
-    </>
+    <div>
+      <h1>Data Mahasiswa</h1>
+      {mahasiswa ? (
+        <div>
+          <p>NPM: {params.id}</p>
+          <p>Nama: {mahasiswa.nama}</p>
+          <p>Jenis Kelamin: {{ L: "Laki-Laki", P: "Perempuan" }[mahasiswa.jenis_kelamin]}</p>
+          <p>Alamat: {mahasiswa.alamat}</p>
+          <p>Hobi: {mahasiswa.hobi?.join(", ")}</p>
+        </div>
+      ):(
+      <p>Mahasiswa Tidak Terdaftar</p>
+      )}
+    </div>
   );
 };
 export default Mahasiswa;
